@@ -21,7 +21,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function validate(values: FormValues): FieldErrors {
   const errors: FieldErrors = {};
   if (values.name.trim().length < 2) errors.name = 'Enter your name.';
-  if (!EMAIL_PATTERN.test(values.email.trim())) errors.email = 'Enter a valid email address.';
+  if (!EMAIL_PATTERN.test(values.email.trim())) errors.email = 'Please Enter a valid email address.';
   if (values.message.trim().length < 10) errors.message = 'Tell us a little more — at least 10 characters.';
   return errors;
 }
