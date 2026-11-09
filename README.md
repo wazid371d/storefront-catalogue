@@ -6,8 +6,15 @@ each be swapped later without a rewrite — see [`SYSTEM_DESIGN.md`](./SYSTEM_DE
 full architecture, and [`DECISIONS.md`](./DECISIONS.md) for assumptions and trade-offs.
 
 **Stack:** React 18 + TypeScript (client) · Node.js + Express + TypeScript (API) · MongoDB ·
-AWS-compatible, run locally with Docker Compose. Why this stack, and why MongoDB specifically,
-is explained in [`SYSTEM_DESIGN.md` §02](./SYSTEM_DESIGN.md#02-tech-stack--rationale) and
+AWS-compatible, run locally with Docker Compose.
+
+**Why this combination:** one language (TypeScript) end to end keeps the client's DTOs and the
+API's response shapes honest against each other, and both are the "preferred" option in the
+brief's own table. MongoDB over the Laravel/relational route because the one thing this app
+actually owns — enquiries, curation, the product cache — is document-shaped and will keep
+changing shape as the brief's own data source changes; schema-on-read means that's a new provider,
+not a migration. Full rationale, including the trade-offs accepted, is in
+[`SYSTEM_DESIGN.md` §02](./SYSTEM_DESIGN.md#02-tech-stack--rationale) and
 [§06](./SYSTEM_DESIGN.md#06-data--database).
 
 ## Quick start
