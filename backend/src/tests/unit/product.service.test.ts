@@ -62,6 +62,32 @@ describe('ProductService', () => {
     expect(result.items.map((p) => p.id)).toEqual(['3']);
   });
 
+  it('matches on a substring of the title, not just a whole word', async () => {
+    // "jack" is a substring of "Jacket", not a separate word — proves this is
+    // "include" matching, not the old whole-word/stemmed text-index search.
+    const result = await buildService().list({ q: 'jack' });
+    expect(result.items.map((p) => p.id)).toEqual(['1']);
+  });
+
+  it('matches on category name', async () => {
+    const result = await buildService().list({ q: 'jewelery' });
+    expect(result.items.map((p) => p.id)).toEqual(['4']);
+  });
+
+  it('matches on a substring of the price', async () => {
+    const provider = new FakeProductProvider([
+      buildProduct({ id: '10', title: 'Desk Lamp', category: { slug: 'electronics', name: 'Electronics' }, price: 45.5 }),
+      buildProduct({ id: '11', title: 'Floor Lamp', category: { slug: 'electronics', name: 'Electronics' }, price: 120 }),
+    ]);
+    const result = await buildService(provider).list({ q: '45.5' });
+    expect(result.items.map((p) => p.id)).toEqual(['10']);
+  });
+
+  it('matches on a substring of the rating', async () => {
+    const result = await buildService().list({ q: '4.7' });
+    expect(result.items.map((p) => p.id)).toEqual(['1']);
+  });
+
   it('serves the stale cache instead of failing when the upstream provider errors but a cache already exists', async () => {
     await buildService().list({}); // warms the cache
 

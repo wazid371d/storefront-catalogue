@@ -44,7 +44,7 @@ A customer-facing catalogue — browse, search, view detail, enquire — fronted
 
 - **"Top rated" is curated, not computed.** Fake Store API has no such field — the brief says the client *chooses* five products. Modelled as a small `featured_products` collection in MongoDB, keyed by provider product id, entirely separate from the catalogue data itself.
 - **Category "top rated"** reuses the same curation set, scoped by category; if a category has no curated picks yet, the top-N by Fake Store's own `rating.rate` stand in until someone curates it.
-- **Search** matches product title and description, case-insensitive, substring. Fake Store API has no search endpoint, so the backend searches its own cached copy.
+- **Search** is case-insensitive substring ("include") matching across title, category name, price, and rating — not exact or tokenized matching. Fake Store API has no search endpoint, so the backend searches its own cached copy.
 - **"Sales inbox"** is one configured address via env var, not a ticketing system.
 - **No accounts** for customers or admins in the PoC — curation is seeded from a JSON file rather than an admin UI (see [§13](#13-roadmap--cuts), dropped scope).
 - **Currency** stays USD, matching Fake Store's data.
@@ -218,7 +218,7 @@ MongoDB holds the three things this app actually owns: curation, enquiries, and 
 
 | Collection | Shape | Indexes |
 |---|---|---|
-| `products_cache` | Normalised product DTO + `cachedAt` | TTL on `cachedAt` (15 min) · text index on `title`+`description` · `category.slug` |
+| `products_cache` | Normalised product DTO + `cachedAt` | TTL on `cachedAt` (15 min) · `category.slug`. Search itself (title/category/price/rating substring match) runs in application code, not an index — see §07. |
 | `featured_products` | `{ productId, category \| null, position, curatedAt }` | `category`, `position` |
 | `enquiries` | `{ productId, productTitle, name, email, phone, message, status, emailAttempts, createdAt }` | `createdAt` desc · `status` |
 
@@ -236,7 +236,7 @@ Read-heavy catalogue traffic, write-light enquiry traffic — scale each path on
 |---|---|
 | API tier | Stateless Express containers behind an ALB; ECS target-tracking scales task count on CPU/requests. No session state to shard. |
 | Catalogue reads | Cache-aside against `products_cache` absorbs repeat reads and shields the upstream provider from load; **[GROWTH]** Atlas replica set with `secondaryPreferred` reads once traffic outgrows one primary. |
-| Search | Mongo text index on the cache handles tens of thousands of SKUs comfortably; **[GROWTH]** graduate to Atlas Search or OpenSearch if relevance ranking or facets are needed. |
+| Search | Substring matching across title/category/price/rating runs against the in-memory cache per request — fine at today's ~20-SKU catalogue, not a long-term index strategy; **[GROWTH]** graduate to Atlas Search or OpenSearch once SKU count or relevance/facet needs outgrow that. |
 | Static assets | React build on S3 behind CloudFront — scales to any traffic level without touching the API tier. |
 | Enquiries | Low volume by nature (one write per interested customer); scales trivially on a single primary. |
 
@@ -345,7 +345,7 @@ Tests sit on the critical path from the acceptance criteria, not on every file �
 ### With another day
 
 - Wire the real SQS + worker retry path for email.
-- Atlas Search (or OpenSearch) once SKU count or query complexity outgrows a Mongo text index.
+- Atlas Search (or OpenSearch) once SKU count or query complexity outgrows in-application substring matching.
 - A simple protected curation screen, so "top rated" stops being a JSON file.
 - Playwright E2E across all five acceptance-criteria flows.
 - IaC (CDK or Terraform) for the AWS topology in [§10](#10-aws-deployment), instead of prose.

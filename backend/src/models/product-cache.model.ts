@@ -25,7 +25,8 @@ const productCacheSchema = new Schema<ProductCacheDocument>({
   cachedAt: { type: Date, required: true, default: Date.now },
 });
 
-productCacheSchema.index({ title: 'text', description: 'text' });
+// No text index: search is substring matching across title, category name,
+// price, and rating, done in application code — see product-cache.repository.ts.
 productCacheSchema.index({ 'category.slug': 1 });
 // TTL: Mongo drops documents once cachedAt is this old. Refresh logic in the
 // repository decides staleness explicitly — this index is the hard backstop.

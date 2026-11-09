@@ -16,11 +16,14 @@ Where the acceptance criteria in the brief left a gap, this is the call that was
   explicit curated picks in the seed file; if a category had none, the API falls back to the
   top-N products in that category by Fake Store's own `rating.average` (`ProductService
   .getCategoryPage`) rather than showing an empty "top rated" section.
-- **Search is substring matching on title and description**, case-insensitive, via a MongoDB text
-  index on the cached catalogue. Fake Store API has no search endpoint of its own, so this is
-  entirely the backend's own logic against its own cache — the acceptance criterion ("only
-  products that have text matching that search term") doesn't specify fuzzy/ranked search, so
-  exact substring matching was the simplest thing that satisfies it.
+- **Search is case-insensitive substring ("include") matching across title, category name,
+  price, and rating** — not exact or tokenized matching, and not scoped to the product's own
+  text alone. Fake Store API has no search endpoint of its own, so this is entirely the backend's
+  own logic, filtering its cached catalogue in application code (mixed string/numeric fields
+  aren't one efficient Mongo query, and the catalogue is ~20 products). The acceptance criterion
+  ("only products that have text matching that search term") doesn't define which fields count
+  as "text," so this was widened on request to match what a shopper would actually expect —
+  typing a price or a rating should surface the product it describes.
 - **"Sales inbox" is one address**, `SALES_INBOX_EMAIL`, not a ticketing system or per-category
   routing. Nothing in the brief implies more than one inbox.
 - **No customer or admin accounts.** Nothing in the acceptance criteria requires either — curation
@@ -74,7 +77,8 @@ Where the acceptance criteria in the brief left a gap, this is the call that was
 3. Add Playwright E2E coverage across all five acceptance-criteria flows against the Docker
    Compose stack.
 4. Add pagination controls to the category and search pages — the API already supports it.
-5. Graduate search from a Mongo text index to Atlas Search (or OpenSearch) once relevance ranking
-   or typo-tolerance actually matters.
+5. Graduate search from an in-application substring scan to Atlas Search (or OpenSearch) once the
+   catalogue outgrows "fetch the category, filter in memory" or relevance ranking/typo-tolerance
+   starts to matter.
 6. Write the AWS topology in `SYSTEM_DESIGN.md §10` as actual IaC (CDK or Terraform) instead of a
    diagram and a table.

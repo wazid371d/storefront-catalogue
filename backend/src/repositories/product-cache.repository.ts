@@ -1,6 +1,25 @@
 import { ProductCacheModel, ProductCacheDocument } from '../models/product-cache.model';
 import type { Product, ProductCategory, ListProductsParams, Page } from '../types/catalogue';
 
+/**
+ * Case-insensitive substring ("include") match, not exact or tokenized —
+ * across title, category name, price, and rating. Mixed string/numeric
+ * fields aren't one efficient Mongo query, and the whole catalogue is
+ * ~20 products, so filtering the (already category-scoped) candidate
+ * set in application code is simpler and provably correct.
+ */
+function matchesSearchTerm(doc: ProductCacheDocument, rawQuery: string): boolean {
+  const needle = rawQuery.trim().toLowerCase();
+  if (!needle) return true;
+
+  return (
+    doc.title.toLowerCase().includes(needle) ||
+    doc.category.name.toLowerCase().includes(needle) ||
+    String(doc.price).includes(needle) ||
+    (doc.rating ? String(doc.rating.average).includes(needle) : false)
+  );
+}
+
 function toProduct(doc: ProductCacheDocument): Product {
   return {
     id: doc.providerId,
@@ -67,21 +86,18 @@ export class ProductCacheRepository {
 
     const filter: Record<string, unknown> = {};
     if (params.category) filter['category.slug'] = params.category;
-    if (params.q) filter.$text = { $search: params.q };
     if (params.excludeIds && params.excludeIds.length > 0) {
       filter.providerId = { $nin: params.excludeIds };
     }
 
-    const [docs, total] = await Promise.all([
-      ProductCacheModel.find(filter)
-        .sort(params.q ? { score: { $meta: 'textScore' } } : { title: 1 })
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .lean(),
-      ProductCacheModel.countDocuments(filter),
-    ]);
+    const candidates = (await ProductCacheModel.find(filter).sort({ title: 1 }).lean()) as unknown as ProductCacheDocument[];
 
-    return { items: docs.map((d) => toProduct(d as unknown as ProductCacheDocument)), page, limit, total };
+    const matched = params.q ? candidates.filter((doc) => matchesSearchTerm(doc, params.q!)) : candidates;
+
+    const total = matched.length;
+    const items = matched.slice((page - 1) * limit, (page - 1) * limit + limit);
+
+    return { items: items.map((d) => toProduct(d)), page, limit, total };
   }
 
   async findById(providerId: string): Promise<Product | null> {
