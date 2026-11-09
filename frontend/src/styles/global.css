@@ -313,6 +313,30 @@ textarea {
   gap: 20px;
 }
 
+/* Fixed, even column counts per breakpoint — used for the home page's 5 curated
+   picks so a row never ends with one orphaned card, unlike auto-fill. */
+.product-grid--featured {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+@media (max-width: 980px) {
+  .product-grid--featured {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .product-grid--featured {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 420px) {
+  .product-grid--featured {
+    grid-template-columns: 1fr;
+  }
+}
+
 .product-card {
   display: flex;
   flex-direction: column;
@@ -332,7 +356,8 @@ textarea {
 }
 
 .product-card__image {
-  aspect-ratio: 1 / 1;
+  height: 200px;
+  flex-shrink: 0;
   background: #fff;
   display: flex;
   align-items: center;
@@ -359,11 +384,16 @@ textarea {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--color-ink-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .product-card__title {
   font-size: 0.95rem;
   font-weight: 600;
+  line-height: 1.3;
+  min-height: 2.6em;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -373,8 +403,10 @@ textarea {
 .product-card__footer {
   margin-top: auto;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  gap: 6px;
 }
 
 .product-card__price {

@@ -11,23 +11,18 @@ export function HomePage() {
 
   return (
     <>
-      <div className="section-heading">
-        <div>
-          <h1>Fieldstone Goods Co.</h1>
-          <p>Hand-picked favourites from across the catalogue.</p>
-        </div>
-      </div>
-
       {state.status === 'loading' && (
         <section className="section">
           <div className="section-heading">
-            <h2>Top Rated</h2>
+            <h1>Top 5 rated products</h1>
           </div>
-          <ProductGridSkeleton count={5} />
+          <ProductGridSkeleton count={5} variant="featured" />
         </section>
       )}
       {state.status === 'error' && <ErrorState message={state.error} onRetry={reload} />}
-      {state.status === 'success' && <FeaturedCollection title="Top Rated" products={state.data} />}
+      {state.status === 'success' && (
+        <FeaturedCollection title="Top 5 rated products" products={state.data} titleTag="h1" variant="featured" />
+      )}
     </>
   );
 }
