@@ -17,8 +17,24 @@ export function ProductPage() {
   const [isEnquiryOpen, setEnquiryOpen] = useState(false);
   useDocumentTitle(state.status === 'success' ? state.data.title : undefined);
 
-  if (state.status === 'loading') return <ProductDetailSkeleton />;
-  if (state.status === 'error') return <ErrorState message={state.error} onRetry={reload} />;
+  if (state.status === 'loading') {
+    return (
+      <>
+        {/* The product's own title becomes the visible <h1> once it loads — this
+            keeps every state anchored to exactly one heading in the meantime. */}
+        <h1 className="sr-only">Product</h1>
+        <ProductDetailSkeleton />
+      </>
+    );
+  }
+  if (state.status === 'error') {
+    return (
+      <>
+        <h1 className="sr-only">Product</h1>
+        <ErrorState message={state.error} onRetry={reload} />
+      </>
+    );
+  }
 
   const product = state.data;
 

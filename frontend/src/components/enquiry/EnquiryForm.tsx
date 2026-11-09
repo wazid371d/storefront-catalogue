@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import { FormEvent, useRef, useState } from 'react';
 import { submitEnquiry } from '../../api/enquiries';
 import { ApiError } from '../../api/client';
 
@@ -20,6 +20,11 @@ type FieldErrors = Partial<Record<keyof FormValues, string>>;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+type RequiredField = Exclude<keyof FormValues, 'phone'>;
+
+// Order matters: this is also the order focus moves to the first invalid field.
+const REQUIRED_FIELD_ORDER: RequiredField[] = ['name', 'email', 'message'];
+
 function validate(values: FormValues): FieldErrors {
   const errors: FieldErrors = {};
   if (values.name.trim().length < 2) errors.name = 'Enter your name.';
@@ -33,11 +38,11 @@ export function EnquiryForm({ productId, productTitle, onDone }: EnquiryFormProp
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [status, setStatus] = useState<'idle' | 'submitting' | 'submitted'>('idle');
-  const nameInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    nameInputRef.current?.focus();
-  }, []);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const messageInputRef = useRef<HTMLTextAreaElement>(null);
+  const fieldRefs = { name: nameInputRef, email: emailInputRef, message: messageInputRef };
 
   function updateField<K extends keyof FormValues>(key: K, value: string) {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -48,7 +53,14 @@ export function EnquiryForm({ productId, productTitle, onDone }: EnquiryFormProp
     const fieldErrors = validate(values);
     setErrors(fieldErrors);
     setSubmitError(null);
-    if (Object.keys(fieldErrors).length > 0) return;
+
+    if (Object.keys(fieldErrors).length > 0) {
+      // Move focus to the first invalid field so its error is announced
+      // immediately, instead of leaving an AT user to discover it by chance.
+      const firstInvalid = REQUIRED_FIELD_ORDER.find((field) => fieldErrors[field]);
+      if (firstInvalid) fieldRefs[firstInvalid].current?.focus();
+      return;
+    }
 
     setStatus('submitting');
     try {
@@ -85,7 +97,11 @@ export function EnquiryForm({ productId, productTitle, onDone }: EnquiryFormProp
 
   return (
     <form onSubmit={handleSubmit} noValidate>
-      {submitError && <p className="enquiry-form__submit-error">{submitError}</p>}
+      {submitError && (
+        <p className="enquiry-form__submit-error" role="alert">
+          {submitError}
+        </p>
+      )}
 
       <div className="form-field">
         <label htmlFor="enquiry-name">Name</label>
@@ -94,6 +110,7 @@ export function EnquiryForm({ productId, productTitle, onDone }: EnquiryFormProp
           ref={nameInputRef}
           value={values.name}
           onChange={(event) => updateField('name', event.target.value)}
+          aria-required="true"
           aria-invalid={Boolean(errors.name)}
           aria-describedby={errors.name ? 'enquiry-name-error' : undefined}
         />
@@ -108,9 +125,11 @@ export function EnquiryForm({ productId, productTitle, onDone }: EnquiryFormProp
         <label htmlFor="enquiry-email">Email</label>
         <input
           id="enquiry-email"
+          ref={emailInputRef}
           type="email"
           value={values.email}
           onChange={(event) => updateField('email', event.target.value)}
+          aria-required="true"
           aria-invalid={Boolean(errors.email)}
           aria-describedby={errors.email ? 'enquiry-email-error' : undefined}
         />
@@ -130,8 +149,10 @@ export function EnquiryForm({ productId, productTitle, onDone }: EnquiryFormProp
         <label htmlFor="enquiry-message">Message</label>
         <textarea
           id="enquiry-message"
+          ref={messageInputRef}
           value={values.message}
           onChange={(event) => updateField('message', event.target.value)}
+          aria-required="true"
           aria-invalid={Boolean(errors.message)}
           aria-describedby={errors.message ? 'enquiry-message-error' : undefined}
         />

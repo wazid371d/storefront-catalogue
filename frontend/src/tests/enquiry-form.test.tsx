@@ -14,6 +14,19 @@ describe('EnquiryForm', () => {
     expect(await screen.findByText(/enter your name/i)).toBeInTheDocument();
     expect(screen.getByText(/enter a valid email address/i)).toBeInTheDocument();
     expect(submitSpy).not.toHaveBeenCalled();
+
+    // the first invalid field gets focus, so a screen reader announces its
+    // error immediately instead of leaving it to be discovered by chance
+    expect(screen.getByLabelText(/^name$/i)).toHaveFocus();
+  });
+
+  it('marks required fields as such for assistive tech', () => {
+    render(<EnquiryForm productId="1" productTitle="Mens Cotton Jacket" />);
+
+    expect(screen.getByLabelText(/^name$/i)).toHaveAttribute('aria-required', 'true');
+    expect(screen.getByLabelText(/^email$/i)).toHaveAttribute('aria-required', 'true');
+    expect(screen.getByLabelText(/^message$/i)).toHaveAttribute('aria-required', 'true');
+    expect(screen.getByLabelText(/phone/i)).not.toHaveAttribute('aria-required');
   });
 
   it('submits the enquiry and shows a thank-you message on success', async () => {
@@ -48,7 +61,7 @@ describe('EnquiryForm', () => {
     await user.type(screen.getByLabelText(/^message$/i), 'Is this available in a large?');
     await user.click(screen.getByRole('button', { name: /send enquiry/i }));
 
-    expect(await screen.findByText(/network error/i)).toBeInTheDocument();
+    expect(await screen.findByRole('alert')).toHaveTextContent(/network error/i);
     expect(screen.getByRole('button', { name: /send enquiry/i })).toBeEnabled();
   });
 });

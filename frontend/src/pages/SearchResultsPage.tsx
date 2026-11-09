@@ -18,7 +18,9 @@ export function SearchResultsPage() {
         <div>
           <h1>Results for &ldquo;{query}&rdquo;</h1>
           {state.status === 'success' && (
-            <p>
+            // polite + atomic: announces the new count when a search on this same page
+            // (not a route change) completes, without needing focus to move anywhere.
+            <p role="status" aria-live="polite" aria-atomic="true">
               {state.data.total} {state.data.total === 1 ? 'product' : 'products'} found
             </p>
           )}

@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import { SiteHeader } from './components/layout/SiteHeader';
 import { SiteFooter } from './components/layout/SiteFooter';
 import { ScrollToTop } from './components/layout/ScrollToTop';
+import { RouteAnnouncer } from './components/layout/RouteAnnouncer';
 import { HomePage } from './pages/HomePage';
 import { CategoryPage } from './pages/CategoryPage';
 import { ProductPage } from './pages/ProductPage';
@@ -15,6 +16,7 @@ export function App() {
         Skip to content
       </a>
       <ScrollToTop />
+      <RouteAnnouncer />
       <SiteHeader />
       <main id="main-content" className="app-main" tabIndex={-1}>
         <div className="container">

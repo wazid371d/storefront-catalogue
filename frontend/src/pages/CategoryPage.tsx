@@ -27,9 +27,18 @@ export function CategoryPage() {
           <ProductGridSkeleton />
         </section>
       )}
-      {state.status === 'error' && <ErrorState message={state.error} onRetry={reload} />}
+      {state.status === 'error' && (
+        <>
+          {/* The visible heading above only renders while loading — this keeps every
+              state anchored to exactly one <h1> matching the page's actual subject,
+              without changing what's visibly on screen. */}
+          <h1 className="sr-only">{categoryLabel}</h1>
+          <ErrorState message={state.error} onRetry={reload} />
+        </>
+      )}
       {state.status === 'success' && (
         <>
+          <h1 className="sr-only">{categoryLabel}</h1>
           <FeaturedCollection title="Top Rated" subtitle={`Our picks in ${categoryLabel}`} products={state.data.featured} />
           <section className="section">
             <div className="section-heading">

@@ -19,7 +19,12 @@ export function HomePage() {
           <ProductGridSkeleton count={5} variant="featured" />
         </section>
       )}
-      {state.status === 'error' && <ErrorState message={state.error} onRetry={reload} />}
+      {state.status === 'error' && (
+        <>
+          <h1 className="sr-only">Top 5 rated products</h1>
+          <ErrorState message={state.error} onRetry={reload} />
+        </>
+      )}
       {state.status === 'success' && (
         <FeaturedCollection title="Top 5 rated products" products={state.data} titleTag="h1" variant="featured" />
       )}
