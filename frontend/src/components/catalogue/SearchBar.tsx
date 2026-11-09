@@ -9,7 +9,10 @@ export function SearchBar() {
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
     const trimmed = term.trim();
-    if (!trimmed) return;
+    if (!trimmed) {
+      navigate('/');
+      return;
+    }
     navigate(`/search?q=${encodeURIComponent(trimmed)}`);
   }
 
