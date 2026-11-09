@@ -31,13 +31,18 @@ describe('SearchBar', () => {
     expect(await screen.findByTestId('location')).toHaveTextContent('/search?q=jacket');
   });
 
-  it('returns to the home page when the search term is cleared and submitted', async () => {
+  it('returns to the home page as soon as the search term is cleared, with no extra click needed', async () => {
     const user = userEvent.setup();
     renderApp('/search?q=jacket');
 
     await user.clear(screen.getByRole('searchbox', { name: /search products/i }));
-    await user.click(screen.getByRole('button', { name: /search/i }));
 
     expect(await screen.findByTestId('home')).toBeInTheDocument();
+  });
+
+  it('does not redirect away while the box is simply empty on a non-search page', () => {
+    renderApp('/');
+
+    expect(screen.getByTestId('home')).toBeInTheDocument();
   });
 });

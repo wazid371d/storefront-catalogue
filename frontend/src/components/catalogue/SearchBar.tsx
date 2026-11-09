@@ -1,10 +1,20 @@
-import { FormEvent, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { FormEvent, useEffect, useState } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 export function SearchBar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const [term, setTerm] = useState(searchParams.get('q') ?? '');
+
+  // Clearing the box while viewing results is "I'm done searching" — take the
+  // customer back to browsing immediately, not just on the next submit.
+  useEffect(() => {
+    if (location.pathname === '/search' && term.trim() === '') {
+      navigate('/');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [term, location.pathname]);
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
