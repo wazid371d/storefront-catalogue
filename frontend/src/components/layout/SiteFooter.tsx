@@ -1,7 +1,7 @@
 export function SiteFooter() {
   return (
     <footer className="site-footer">
-      <p>&copy; {new Date().getFullYear()} Fieldstone Goods Co. — a catalogue proof of concept.</p>
+      <p>&copy; {new Date().getFullYear()} Fieldstone Goods Co.</p>
     </footer>
   );
 }
