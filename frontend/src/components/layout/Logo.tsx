@@ -2,12 +2,14 @@ interface LogoProps {
   size?: number;
 }
 
-/** The Fieldstone mark — a cut stone, matching the favicon. Reused wherever the brand appears. */
+/** The Fieldstone mark — a stacked cairn of three stones, matching the favicon. */
 export function Logo({ size = 28 }: LogoProps) {
   return (
     <svg className="logo-mark" width={size} height={size} viewBox="0 0 32 32" role="img" aria-label="Fieldstone logo">
-      <path d="M16 3l11 9-5 17H10L5 12z" fill="currentColor" />
-      <path d="M16 3l11 9-5 17h-6z" fill="currentColor" opacity="0.6" />
+      <ellipse cx="16" cy="28" rx="10" ry="1.6" fill="currentColor" opacity="0.15" />
+      <ellipse cx="16" cy="23.5" rx="11" ry="5" fill="currentColor" />
+      <ellipse cx="14.5" cy="16" rx="8" ry="4.2" fill="currentColor" opacity="0.85" />
+      <ellipse cx="17" cy="9.5" rx="5.3" ry="3.4" fill="currentColor" opacity="0.7" />
     </svg>
   );
 }
