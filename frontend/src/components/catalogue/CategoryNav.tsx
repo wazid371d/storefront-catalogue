@@ -3,7 +3,7 @@ import { useAsync } from '../../hooks/useAsync';
 import { fetchCategories } from '../../api/products';
 
 export function CategoryNav() {
-  const state = useAsync(() => fetchCategories().then((r) => r.items), []);
+  const [state] = useAsync(() => fetchCategories().then((r) => r.items), []);
 
   if (state.status !== 'success') return null;
 

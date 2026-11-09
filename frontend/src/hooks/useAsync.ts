@@ -1,13 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export type AsyncState<T> =
   | { status: 'loading' }
   | { status: 'error'; error: string }
   | { status: 'success'; data: T };
 
-/** Re-runs `fn` whenever `deps` changes; ignores results from a stale run. */
-export function useAsync<T>(fn: () => Promise<T>, deps: unknown[]): AsyncState<T> {
+/**
+ * Re-runs `fn` whenever `deps` changes, or when `reload` is called. Ignores
+ * results from a stale run.
+ */
+export function useAsync<T>(fn: () => Promise<T>, deps: unknown[]): [AsyncState<T>, () => void] {
   const [state, setState] = useState<AsyncState<T>>({ status: 'loading' });
+  const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -27,7 +31,9 @@ export function useAsync<T>(fn: () => Promise<T>, deps: unknown[]): AsyncState<T
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
+  }, [...deps, reloadToken]);
 
-  return state;
+  const reload = useCallback(() => setReloadToken((token) => token + 1), []);
+
+  return [state, reload];
 }

@@ -37,7 +37,7 @@ export function EnquiryDialog({ isOpen, onClose, productId, productTitle }: Enqu
         </div>
         <p className="enquiry-dialog__subtitle">{productTitle}</p>
         {/* remounted each time it opens, so a previous submission never lingers */}
-        {isOpen && <EnquiryForm productId={productId} productTitle={productTitle} />}
+        {isOpen && <EnquiryForm productId={productId} productTitle={productTitle} onDone={onClose} />}
       </div>
     </dialog>
   );

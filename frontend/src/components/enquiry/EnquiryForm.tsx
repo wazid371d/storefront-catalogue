@@ -1,10 +1,12 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 import { submitEnquiry } from '../../api/enquiries';
 import { ApiError } from '../../api/client';
 
 interface EnquiryFormProps {
   productId: string;
   productTitle: string;
+  /** called when the customer dismisses the post-submit confirmation (e.g. closes the dialog) */
+  onDone?: () => void;
 }
 
 interface FormValues {
@@ -26,11 +28,16 @@ function validate(values: FormValues): FieldErrors {
   return errors;
 }
 
-export function EnquiryForm({ productId, productTitle }: EnquiryFormProps) {
+export function EnquiryForm({ productId, productTitle, onDone }: EnquiryFormProps) {
   const [values, setValues] = useState<FormValues>({ name: '', email: '', phone: '', message: '' });
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [status, setStatus] = useState<'idle' | 'submitting' | 'submitted'>('idle');
+  const nameInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    nameInputRef.current?.focus();
+  }, []);
 
   function updateField<K extends keyof FormValues>(key: K, value: string) {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -67,6 +74,11 @@ export function EnquiryForm({ productId, productTitle }: EnquiryFormProps) {
       <div className="enquiry-confirmation">
         <p className="enquiry-confirmation__title">Thank you!</p>
         <p>We&rsquo;ve passed your enquiry about &ldquo;{productTitle}&rdquo; to our team — expect to hear back soon.</p>
+        {onDone && (
+          <button type="button" className="button" onClick={onDone}>
+            Done
+          </button>
+        )}
       </div>
     );
   }
@@ -79,6 +91,7 @@ export function EnquiryForm({ productId, productTitle }: EnquiryFormProps) {
         <label htmlFor="enquiry-name">Name</label>
         <input
           id="enquiry-name"
+          ref={nameInputRef}
           value={values.name}
           onChange={(event) => updateField('name', event.target.value)}
           aria-invalid={Boolean(errors.name)}
