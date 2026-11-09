@@ -30,7 +30,7 @@ services:
       SMTP_HOST: mailhog
       SMTP_PORT: "1025"
       SMTP_FROM: enquiries@fieldstonegoods.test
-      SALES_INBOX_EMAIL: sales@fieldstonegoods.test
+      SALES_INBOX_EMAIL: wazid371d@gmail.com
       CORS_ORIGIN: http://localhost:3000
       RATE_LIMIT_WINDOW_MS: "60000"
       RATE_LIMIT_MAX: "20"
