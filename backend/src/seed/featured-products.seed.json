@@ -1,0 +1,19 @@
+[
+  { "productId": "3", "category": null, "position": 1 },
+  { "productId": "5", "category": null, "position": 2 },
+  { "productId": "11", "category": null, "position": 3 },
+  { "productId": "12", "category": null, "position": 4 },
+  { "productId": "18", "category": null, "position": 5 },
+
+  { "productId": "3", "category": "mens-clothing", "position": 1 },
+  { "productId": "1", "category": "mens-clothing", "position": 2 },
+
+  { "productId": "5", "category": "jewelery", "position": 1 },
+  { "productId": "6", "category": "jewelery", "position": 2 },
+
+  { "productId": "11", "category": "electronics", "position": 1 },
+  { "productId": "12", "category": "electronics", "position": 2 },
+
+  { "productId": "18", "category": "womens-clothing", "position": 1 },
+  { "productId": "19", "category": "womens-clothing", "position": 2 }
+]
